@@ -33,6 +33,20 @@ async function run(){
         const itemsCollection = client.db('Menufecturer-Co').collection('items');
         const bookingCollection = client.db('Menufecturer-Co').collection('booking');
         const userCollection = client.db('Menufecturer-Co').collection('users');
+        const reviewCollection = client.db('Menufecturer-Co').collection('reviews');
+
+        app.get('/reviews', async (req, res)=>{
+            const query = {};
+            const cursor = reviewCollection.find(query);
+            const items = await cursor.toArray();
+            res.send(items);
+        })
+
+        app.post('/reviews', async (req, res)=>{
+            const newReviews = req.body;
+            const result = await reviewCollection.insertOne(newReviews);
+            res.send(result);
+        })
 
         app.get('/items', async (req, res)=>{
             const query = {};
@@ -48,7 +62,7 @@ async function run(){
             res.send(item);
         })
 
-        app.get('/booking', verifyJWT, async (req, res)=>{
+        app.get('/booking',  async (req, res)=>{
             const email = req.query.email;
             const authorization = req.headers.authorization;
             console.log('inside Auth', authorization)
@@ -57,20 +71,33 @@ async function run(){
             res.send(bookings);
         })
 
-        app.get('/user', verifyJWT, async (req, res)=>{
+        app.get('/user', async (req, res)=>{
             const users = await userCollection.find().toArray();
             res.send(users)
         })
 
-        app.put('/user/admin/:email', async (req, res) =>{
+        // app.get('/admin/:email', async (req, res) => {
+        //     const email = req.params.email;
+        //     const user = await userCollection.findOne({ email: email });
+        //     const isAdmin = user.role === 'admin';
+        //     res.send({ admin: isAdmin })
+        //   })
+
+        app.put('/user/admin/:email', verifyJWT, async (req, res) =>{
             const email = req.params.email;
-            const filter = {email: email};
-            const updateDoc = {
-                $set: {role: 'admin'},
-            }
-            const result = await userCollection.updateOne(filter, updateDoc)
+            
+            
            
-            res.send(result)
+                const filter = {email: email};
+                const updateDoc = {
+                    $set: {role: 'admin'},
+                }
+                const result = await userCollection.updateOne(filter, updateDoc)
+                res.send(result)
+            
+            // else{
+            //     res.status(403).send({message: 'forbidden'})
+            // }
         })
 
         app.put('/user/:email', async (req, res) =>{
