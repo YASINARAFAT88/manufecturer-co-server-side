@@ -28,6 +28,10 @@ function verifyJWT(req, res, next){
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.lfbfx.mongodb.net/?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true, serverApi: ServerApiVersion.v1 });
 
+
+app.use(cors());
+app.use(express.json());
+
 async function run(){
     try{
         await client.connect();
@@ -86,9 +90,6 @@ async function run(){
 
         app.put('/user/admin/:email', verifyJWT, async (req, res) =>{
             const email = req.params.email;
-            
-            
-           
                 const filter = {email: email};
                 const updateDoc = {
                     $set: {role: 'admin'},
@@ -122,10 +123,6 @@ async function run(){
     }
 }
 run().catch(console.dir);
-
-//middlware
-app.use(cors());
-app.use(express.json());
 
 app.get('/', (req, res) =>{
     res.send('running Menufec-Co')
